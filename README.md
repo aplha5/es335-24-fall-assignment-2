@@ -47,7 +47,7 @@ Begin by exploring the [instructor's notebook](https://github.com/nipunbatra/ml-
 
 Follow the below steps to execute this task:
 - Start with a 400x400 high-resolution image (the original image).
-- Resize it to a 200x200 image (this will be your input image). You can use OpenCV's resize function or another library for this. Here’s a tutorial to help: [OpenCV Resize Image Tutorial](https://docs.google.com/document/d/1Gz9pl8nvzqOq8huGGgWnEwzPUJbMU8mC/edit).
+- Resize it to a 200x200 image (this will be your input image). You can use OpenCV's resize function or another library for this. Here’s a tutorial to help: [OpenCV Resize Image Tutorial](https://www.tutorialkart.com/opencv/python/opencv-python-resize-image/#gsc.tab=0).
 - Use Random Fourier Features (RFF) along with linear regression to learn a function based on the 200x200 image.
 - Use the learned function to predict the pixel values for the 400x400 image. This means predicting the values for the pixels that fall between the existing pixels of the 200x200 image.
 - Compare your predicted 400x400 image with the original 400x400 high-resolution image.

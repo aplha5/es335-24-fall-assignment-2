@@ -13,9 +13,9 @@ y = f_x + eps
 x1 = torch.tensor(x1, dtype=torch.float32, requires_grad=False)
 y = torch.tensor(y, dtype=torch.float32, requires_grad=False)
 
-# Initialize parameters θ0 and θ1 (requires_grad=True for autograd to track them)
-theta_0 = torch.tensor(4.0, requires_grad=True)
-theta_1 = torch.tensor(3.0, requires_grad=True)
+# Initializing parameters θ0 and θ1 (requires_grad=True for autograd to track them)
+theta_0 = torch.tensor(0.0, requires_grad=True)
+theta_1 = torch.tensor(0.0, requires_grad=True)
 
 # linear regression model
 def model(x):

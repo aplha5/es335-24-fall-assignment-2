@@ -24,7 +24,7 @@ def model(x, theta_0, theta_1):
 def mse_loss(predicted, target):
     return torch.mean((predicted - target) ** 2)
 
-# Compute the optimal theta_0 and theta_1 using normal equations
+# Computing the optimal theta_0 and theta_1 using normal equations
 def compute_optimal_theta(x, y):
     n = len(x)
     x_sum = torch.sum(x)
@@ -203,9 +203,9 @@ theta_0_sgd, theta_1_sgd, sgd_losses, sgd_iters, sgd_total_iter, s_epochh = grad
 # Print results
 print("Optimal values: theta_0 =", theta_0_opt, "theta_1 =", theta_1_opt)
 print("min_loss =", min_loss)
-print("Average iterations required for Full-batch method to reach minimum loss are:", full_batch_total_iter / f_epochh)
-print("Average iterations required for Mini-batch method to reach minimum loss are:", mini_batch_total_iter / m_epochh)
-print("Average iterations required for SGD method to reach minimum loss are:", sgd_total_iter / s_epochh)
+print("Average iterations required for Full-batch method to reach minimum loss are:", full_batch_total_iter / f_epochh,f"Number of epochs {f_epochh}")
+print("Average iterations required for Mini-batch method to reach minimum loss are:", mini_batch_total_iter / m_epochh,f"Number of epochs {m_epochh}")
+print("Average iterations required for SGD method to reach minimum loss are:", sgd_total_iter / s_epochh,f"Number of epochs {s_epochh}")
 
 # Plot the loss convergence for each method
 plot_loss_convergence(full_batch_losses, mini_batch_losses, sgd_losses)

@@ -149,12 +149,8 @@ plot_images(img, reconstructed_img)
 # Step 8: Calculate MSE and PSNR
 def calculate_metrics(original_img, reconstructed_img):
     original_img_np = rearrange(original_img, 'c h w -> (h w) c').cpu().numpy()
-    reconstructed_img_np = reconstructed_img.cpu().numpy().reshape(-1, 3)
-    
-    # Calculate MSE
+    reconstructed_img_np = reconstructed_img.cpu().numpy().reshape(-1, 3)  
     mse = mean_squared_error(original_img_np, reconstructed_img_np)
-    
-    # Calculate PSNR
     psnr = 10 * log10(1 / mse)
     
     return mse, psnr

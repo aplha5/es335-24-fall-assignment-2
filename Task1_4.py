@@ -47,33 +47,28 @@ def gradient_descent(x, y, min_loss, method='full-batch', lr=0.01, batch_size=5,
     
     for epoch in range(max_epochs):
         if method == 'full-batch':
-            # Full-batch gradient descent
-            total_iterations += 1  # One iteration per epoch
+           
+            total_iterations += 1 
             theta_0.grad = None
             theta_1.grad = None
             y_pred = model(x, theta_0, theta_1)
             loss = mse_loss(y_pred, y)
-            loss.backward()  # Compute gradients
-            
-            # Update parameters with momentum
+            loss.backward()  
             with torch.no_grad():
                 v_theta_0 = momentum * v_theta_0 + lr * theta_0.grad
                 v_theta_1 = momentum * v_theta_1 + lr * theta_1.grad
                 theta_0 -= v_theta_0
                 theta_1 -= v_theta_1
         elif method == 'stochastic':
-            # Stochastic gradient descent (SGD)
             indices = np.random.permutation(n)
             for i in indices:
-                total_iterations += 1  # One iteration per sample
+                total_iterations += 1 
                 x_single, y_single = x[i:i+1], y[i:i+1]
                 theta_0.grad = None
                 theta_1.grad = None
                 y_pred = model(x_single, theta_0, theta_1)
                 loss = mse_loss(y_pred, y_single)
-                loss.backward()  # Compute gradients
-                
-                # Update parameters for each individual sample with momentum
+                loss.backward()  
                 with torch.no_grad():
                     v_theta_0 = momentum * v_theta_0 + lr * theta_0.grad
                     v_theta_1 = momentum * v_theta_1 + lr * theta_1.grad

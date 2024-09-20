@@ -61,27 +61,6 @@ def gradient_descent(x, y, min_loss, method='full-batch', lr=0.01, batch_size=5,
                 v_theta_1 = momentum * v_theta_1 + lr * theta_1.grad
                 theta_0 -= v_theta_0
                 theta_1 -= v_theta_1
-
-        elif method == 'mini-batch':
-            # Mini-batch gradient descent
-            indices = np.random.permutation(n)
-            for i in range(0, n, batch_size):
-                total_iterations += 1  # One iteration per mini-batch
-                idx = indices[i:i+batch_size]
-                x_batch, y_batch = x[idx], y[idx]
-                theta_0.grad = None
-                theta_1.grad = None
-                y_pred = model(x_batch, theta_0, theta_1)
-                loss = mse_loss(y_pred, y_batch)
-                loss.backward()  # Compute gradients
-                
-                # Update parameters for each mini-batch with momentum
-                with torch.no_grad():
-                    v_theta_0 = momentum * v_theta_0 + lr * theta_0.grad
-                    v_theta_1 = momentum * v_theta_1 + lr * theta_1.grad
-                    theta_0 -= v_theta_0
-                    theta_1 -= v_theta_1
-
         elif method == 'stochastic':
             # Stochastic gradient descent (SGD)
             indices = np.random.permutation(n)
@@ -146,8 +125,8 @@ min_loss = compute_min_loss(x, y, theta_0_opt, theta_1_opt)
 theta_0_vals_full, theta_1_vals_full, losses_full, iterations_full, total_iterations_full, e_full = gradient_descent(x, y, min_loss, method='full-batch', lr=learning_rate, momentum=momentum, max_epochs=max_epochs, epsilon=epsilon)
 theta_0_vals_sgd, theta_1_vals_sgd, losses_sgd, iterations_sgd, total_iterations_sgd, e_sgd = gradient_descent(x, y, min_loss, method='stochastic', lr=learning_rate, momentum=momentum, max_epochs=max_epochs, epsilon=epsilon)
 
-print(f"Steps with Full-Batch Gradient Descent with Momentum: {total_iterations_full / len(iterations_full)}",len(iterations_full))
-print(f"Steps with Stochastic Gradient Descent with Momentum: {total_iterations_sgd / len(iterations_sgd)}",len(iterations_sgd))
+print(f"Steps with Full-Batch Gradient Descent with Momentum: {total_iterations_full / len(iterations_full)}",f" Number of epochs:{len(iterations_full)}")
+print(f"Steps with Stochastic Gradient Descent with Momentum: {total_iterations_sgd / len(iterations_sgd)}",f" Number of epochs:{len(iterations_sgd)}")
 
 # Function to plot contour plots
 def plot_contours(x, y, theta_0_vals, theta_1_vals, method_name, epochs_to_plot):
@@ -246,8 +225,8 @@ theta_0_vals_vanilla_full, theta_1_vals_vanilla_full, losses_vanilla_full, itera
 theta_0_vals_vanilla_sgd, theta_1_vals_vanilla_sgd, losses_vanilla_sgd, iterations_vanilla_sgd, total_iterations_vanilla_sgd, e_vanilla_sgd = gradient_descent_vanilla(x, y, min_loss, method='stochastic', lr=learning_rate, max_epochs=max_epochs, epsilon=epsilon)
 
 # Print results
-print(f"Vanilla Full-Batch GD Steps: {total_iterations_vanilla_full / len(iterations_vanilla_full)}",len(iterations_vanilla_full))
-print(f"Vanilla Stochastic GD Steps: {total_iterations_vanilla_sgd / len(iterations_vanilla_sgd)}",len(iterations_vanilla_sgd))
+print(f"Vanilla Full-Batch GD Steps: {total_iterations_vanilla_full / len(iterations_vanilla_full)}",f" Number of epochs:{len(iterations_vanilla_full)}")
+print(f"Vanilla Stochastic GD Steps: {total_iterations_vanilla_sgd / len(iterations_vanilla_sgd)}",f" Number of epochs:{len(iterations_vanilla_sgd)}")
 
 # Plot contours for every epoch
 plot_contours(x, y, theta_0_vals_full, theta_1_vals_full, 'Full-Batch with Momentum', range(15))

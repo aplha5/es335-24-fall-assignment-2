@@ -162,5 +162,3 @@ def calculate_metrics(original_img, reconstructed_img):
 mse, psnr = calculate_metrics(img, reconstructed_img)
 print(f"MSE: {mse:.6f}")
 print(f"PSNR: {psnr:.2f} dB")
-
-

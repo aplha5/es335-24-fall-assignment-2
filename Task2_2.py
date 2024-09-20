@@ -1,87 +1,78 @@
-import os
+import requests
 import torch
-import torchaudio
-import numpy as np
+import torchvision
+import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+import numpy as np
+import torch.nn as nn
+import torchaudio
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 import soundfile as sf
-from IPython.display import Audio, display
+import os
 
-# Load audio file (you can replace this with your actual file path)
-file_path = os.path.join(os.path.dirname(__file__), 'audio.mp3')
-audio, sr = torchaudio.load(file_path)
+# Define the URL and local file path for the WAV file
 
-# Trim the audio to the first 5 seconds
-duration = 5
-audio = audio[0, :sr * duration]  # Trim to 5 seconds
-t = torch.linspace(0, duration, steps=audio.shape[0])  # Time points (t)
+wav_file_path = os.path.join(os.path.dirname(__file__), 'audio.wav')
 
-# Plot the original audio waveform
-def audio_plot(audio, sr, title):
-    plt.figure(figsize=(12, 4))
-    plt.plot(audio, color='blue', alpha=0.6)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.title(title)
-    plt.grid()
-    plt.show()
 
-audio_plot(audio, sr, 'Original Audio Waveform')
+# Load your audio sample
+audio, sr = torchaudio.load(wav_file_path)
+audio = audio[0]  # Use first channel if stereo
+tm = audio.shape[0] / sr
+print(f"Audio length: {tm} seconds")
 
-# RFF feature transformation
+# Trim to 5 seconds if necessary
+if tm > 5:
+    audio = audio[:5 * sr]
+
+# Prepare time variable
+X = torch.arange(0, len(audio)).unsqueeze(1).float()
+X = X / X.max() * 200 - 100  # Scale to [-100, 100]
+
+# Create RFF features
 def create_rff_features(X, num_features, sigma):
-    rff = RBFSampler(n_components=num_features, gamma=1 / (2 * sigma**2), random_state=42)
-    X_rff = rff.fit_transform(X.cpu().numpy().reshape(-1, 1))
-    return torch.tensor(X_rff, dtype=torch.float32)
+    rff = RBFSampler(n_components=num_features, gamma=1 / (2 * sigma**2), random_state=13)
+    X = X.cpu().numpy()
+    X = rff.fit_transform(X)
+    return torch.tensor(X, dtype=torch.float32)
 
 num_features = 5000
-sigma = 0.1
-X_rff = create_rff_features(t, num_features, sigma)
+sigma = 0.008
+X_rff = create_rff_features(X, num_features, sigma)
 
-# Apply Linear Regression to learn mapping from time (t) to amplitude (A)
+# Train Linear Regression model
 model = LinearRegression()
 model.fit(X_rff.numpy(), audio.numpy())
 
-# Predict the reconstructed audio using the learned model
+# Predict audio
 pred_audio = model.predict(X_rff.numpy())
+pred_audio_tensor = torch.tensor(pred_audio, dtype=torch.float32)
 
-# Save the reconstructed audio
-sf.write('reconstructed_audio.wav', pred_audio, sr)
+# Save reconstructed audio
+sf.write('pred_audio.wav', pred_audio, sr)
 
-# Plot the reconstructed audio waveform
-audio_plot(pred_audio, sr, 'Reconstructed Audio Waveform')
+# Calculate RMSE
+rmse = torch.sqrt(torch.mean((pred_audio_tensor - audio) ** 2))
+print(f"RMSE: {rmse.item():.6f}")
 
-# Play the original and reconstructed audio for comparison
-print("Original Audio:")
-display(Audio(audio.numpy(), rate=sr))  # Play original audio
+# Calculate SNR
+signal_power = torch.mean(audio ** 2)
+noise_power = torch.mean((pred_audio_tensor - audio) ** 2)
+snr = 10 * torch.log10(signal_power / noise_power)
+print(f"SNR: {snr.item():.2f} dB")
 
-print("Reconstructed Audio:")
-display(Audio(pred_audio, rate=sr))  # Play reconstructed audio
+# Play reconstructed audio
+from IPython.display import Audio
+Audio(pred_audio, rate=sr)
 
-# Evaluate the reconstruction using RMSE and SNR
-def calculate_rmse(original, reconstructed):
-    return np.sqrt(mean_squared_error(original, reconstructed))
-
-def calculate_snr(original, reconstructed):
-    signal_power = np.mean(np.square(original))
-    noise_power = np.mean(np.square(original - reconstructed))
-    return 10 * np.log10(signal_power / noise_power)
-
-rmse = calculate_rmse(audio.numpy(), pred_audio)
-snr = calculate_snr(audio.numpy(), pred_audio)
-
-print(f"RMSE: {rmse}")
-print(f"SNR: {snr} dB")
-
-# Plot the original vs reconstructed audio for visual comparison
-plt.figure(figsize=(12, 4))
-plt.plot(audio.numpy(), label='Original Audio', color='blue', alpha=0.6)
-plt.plot(pred_audio, label='Reconstructed Audio', color='red', alpha=0.6)
-plt.xlabel('Time (s)')
+# Plot original and reconstructed audio
+plt.figure(figsize=(15, 4))
+plt.plot(audio.numpy(), color='blue', alpha=0.7, label='Original Audio')
+plt.plot(pred_audio_tensor.numpy(), color='red', alpha=0.7, label='Reconstructed Audio')
+plt.xlabel('Time (samples)')
 plt.ylabel('Amplitude')
-plt.title('Original vs Reconstructed Audio')
+plt.title('Original vs Reconstructed Audio Waveform')
 plt.grid()
 plt.legend()
 plt.show()

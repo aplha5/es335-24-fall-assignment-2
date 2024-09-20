@@ -48,15 +48,14 @@ def gradient_descent(x, y, min_loss, method='full-batch', lr=0.01, batch_size=5,
     # Initialize parameters
     theta_0 = torch.tensor(0.0, requires_grad=True)
     theta_1 = torch.tensor(0.0, requires_grad=True)
-    
+    e=0
     losses = []
     iterations = []
     theta_0_vals = []
     theta_1_vals = []
     n = len(x)
     total_iterations = 0  # Track total iterations
-    e = 0
-    
+
     for epoch in range(max_epochs):
         if method == 'full-batch':
             # Full-batch gradient descent
@@ -108,7 +107,7 @@ def gradient_descent(x, y, min_loss, method='full-batch', lr=0.01, batch_size=5,
                     theta_1 -= lr * theta_1.grad
 
         # Track losses and parameter values after each epoch
-        e += 1
+        e+=1
         current_loss = loss.item()
         losses.append(current_loss)
         iterations.append(epoch)
@@ -119,7 +118,27 @@ def gradient_descent(x, y, min_loss, method='full-batch', lr=0.01, batch_size=5,
         if abs(current_loss - min_loss) < epsilon:
             break
 
-    return theta_0_vals, theta_1_vals, losses, iterations, total_iterations, e  # Return total iterations
+    # Ensure we have 15 entries by padding with the last values if necessary
+    while len(theta_0_vals) < 15:
+        for i in range(0, n, batch_size):
+                #total_iterations += 1  # One iteration per mini-batch
+                idx = indices[i:i+batch_size]
+                x_batch, y_batch = x[idx], y[idx]
+                theta_0.grad = None
+                theta_1.grad = None
+                y_pred = model(x_batch, theta_0, theta_1)
+                loss = mse_loss(y_pred, y_batch)
+                loss.backward()  # Compute gradients
+                
+                # Update parameters for each mini-batch
+                with torch.no_grad():
+                    theta_0 -= lr * theta_0.grad
+                    theta_1 -= lr * theta_1.grad
+        theta_0_vals.append(theta_0.item())
+        theta_1_vals.append(theta_1.item())
+    
+    return theta_0_vals, theta_1_vals, losses, iterations, total_iterations,e
+
 
 # Visualization function for loss convergence
 def plot_loss_convergence(full_batch_losses, mini_batch_losses, sgd_losses):
